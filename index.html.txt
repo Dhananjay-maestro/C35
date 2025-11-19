@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday Princee</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#f7fbff;
+      --bg2:#ffeef8;
+
+      /* Pink only for heading */
+      --accent:#ff2d95;
+      --accent-2:#ff79b9;
+
+      --muted:#5a5a5a;
+      --card-radius:28px;
+      --card-padding:28px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Poppins,Arial;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    }
+
+    .stage{
+      min-height:100vh;
+      width:100vw;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+      padding:24px;
+    }
+
+    .glow{position:absolute; border-radius:50%; filter:blur(80px); opacity:0.22; pointer-events:none;}
+    .g1{width:420px;height:420px;background:radial-gradient(circle at 30% 30%,#ffd6ec,transparent 40%);left:-80px;top:-60px}
+    .g2{width:520px;height:520px;background:radial-gradient(circle at 70% 70%,#ffe6f5,transparent 40%);right:-120px;bottom:-100px}
+
+    .card{
+      width:min(920px,94%);
+      max-width:1100px;
+      height:min(680px,86vh);
+      background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.92));
+      border-radius:var(--card-radius);
+      box-shadow:0 30px 80px rgba(20,20,50,0.08);
+      display:flex;
+      gap:24px;
+      padding:var(--card-padding);
+      align-items:center;
+      position:relative;
+    }
+
+    .left{flex:1; display:flex; justify-content:center; align-items:center; transform:translateX(-12px);}
+    .balloon-bunch{width:460px;height:520px; position:relative;}
+    .balloon-img{
+      position:absolute; left:0; top:0;
+      width:100%; height:100%; object-fit:contain;
+      animation: floatMain 6s ease-in-out infinite, swayMain 6.5s ease-in-out infinite;
+    }
+
+    @keyframes floatMain{
+      0%{transform:translateY(0px) rotate(-2deg);}
+      50%{transform:translateY(-26px) rotate(3deg);}
+      100%{transform:translateY(0px) rotate(-2deg);}
+    }
+    @keyframes swayMain{
+      0%{transform:translateX(0);}
+      50%{transform:translateX(10px);}
+      100%{transform:translateX(0);}
+    }
+
+    .right{flex:1; padding:16px; display:flex; flex-direction:column;}
+
+    .badge{
+      font-family:Merienda;
+      color:var(--accent);
+      background:rgba(255,45,149,0.06);
+      padding:8px 14px;
+      border-radius:18px;
+      display:inline-block;
+    }
+
+    h1{
+      font-family:Merienda;
+      font-size:3.1rem;
+      color:var(--accent-2);
+    }
+
+    .subtitle{
+      font-size:1.05rem;
+      color:black;   /* BLACK FIX */
+      margin-bottom:18px;
+    }
+
+    .action-row{display:flex; gap:20px;}
+
+    .btn{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      padding:12px 18px;
+      border-radius:24px;
+      border:2px solid var(--accent-2);
+      font-weight:600;
+      cursor:pointer;
+    }
+    .btn.secondary{
+      background:transparent;
+      color:var(--accent);
+      border:2px solid var(--accent-2);
+    }
+
+    .cute-click{
+      margin-top:6px;
+      font-size:0.95rem;
+      text-align:center;
+      color:black;   /* BLACK FIX */
+      font-weight:700;
+    }
+
+    #confettiCanvas{
+      position:absolute; left:0; top:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      border-radius:var(--card-radius);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+
+    <div class="card">
+
+      <canvas id="confettiCanvas"></canvas>
+
+      <div class="left">
+        <div class="balloon-bunch">
+          <img src="https://i.ibb.co/Sw47j7k4/pngtree-pink-ballons-png-image-15802315.png" class="balloon-img">
+        </div>
+      </div>
+
+      <div class="right">
+
+        <div class="badge">For Princee</div>
+
+        <h1>Happy Birthday <span style="color:var(--accent)">Princee</span> 🎀</h1>
+
+        <div class="subtitle">May your day sparkle with smiles, hugs and sweet surprises ✨</div>
+
+        <div class="action-row">
+          <div style="text-align:center;">
+            <button class="btn secondary" id="confettiBtn">Celebrate🎀</button>
+            <div class="cute-click">Click ↑</div>
+          </div>
+
+          <div style="text-align:center;">
+            <button class="btn secondary" id="msgBtn">Messages💬</button>
+            <div class="cute-click">Click ↑</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="sparkles"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, confetti = [], animationId = null;
+
+    function setCanvasSize(){
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      W = rect.width; H = rect.height;
+    }
+
+    window.addEventListener('load', setCanvasSize);
+    window.addEventListener('resize', () => setTimeout(setCanvasSize,80));
+
+    function rand(min,max){ return Math.random()*(max-min)+min }
+
+    function spawnConfetti(count=180){
+      const colors = [
+        '#ff3b30',  // red
+        '#ffcc00',  // yellow
+        '#4cd964',  // green
+        '#34aadc',  // blue
+        '#5856d6'   // purple
+      ];
+
+      for(let i=0;i<count;i++){
+        confetti.push({
+          x: rand(0, W),
+          y: rand(-H, 0),
+          s: rand(6,12),
+          vx: rand(-1.5,1.5),
+          vy: rand(2,6),
+          c: colors[Math.floor(rand(0, colors.length))]
+        });
+      }
+      if(!animationId) animate();
+    }
+
+    function drawConfetti(){
+      ctx.clearRect(0,0,W,H);
+      for(const p of confetti){
+        p.x += p.vx;
+        p.y += p.vy;
+        ctx.fillStyle = p.c;
+        ctx.fillRect(p.x, p.y, p.s, p.s*0.6);
+      }
+      confetti = confetti.filter(p => p.y < H + 40);
+      if(confetti.length === 0){
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    function animate(){
+      animationId = requestAnimationFrame(animate);
+      drawConfetti();
+    }
+
+    document.getElementById('confettiBtn').onclick = () => {
+      spawnConfetti(250);
+    };
+  </script>
+
+</body>
+</html>
